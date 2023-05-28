@@ -30,8 +30,7 @@
                         </FXCollections>
                     </items>
                 </ComboBox>
-                <Button fx:id="okButton" text="OK" minWidth="40"/>
-<!--                        onAction="#onChooseSpecies"/>-->
+                <Button fx:id="okButton" text="OK" minWidth="40" onAction="#onChooseSpecies"/>
             </HBox>
             <HBox GridPane.rowIndex="0" GridPane.columnIndex="1" spacing="5" alignment="center">
                 <Button fx:id="submitPathwaysButton" text="Submit Pathways" minWidth="120"/>
