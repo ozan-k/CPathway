@@ -8,6 +8,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 
 public class ToplevelPathwayDataModel {
@@ -22,7 +24,8 @@ public class ToplevelPathwayDataModel {
     }
 
     private void readData() {
-        File theFile = new File("pathwayHierarchyData.json");
+        Path path = Path.of("src","main","resources","com","ozank","cpathway","pathwayHierarchyData.json");
+        File theFile = new File(path.toString());
         if (theFile.exists()) {
             // System.out.println("File exists");
             try {
