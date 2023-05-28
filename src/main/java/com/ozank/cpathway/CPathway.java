@@ -24,7 +24,4 @@ public class CPathway extends Application {
         launch();
     }
 
-    public int add(int a, int b){
-        return a+b;
-    }
 }
