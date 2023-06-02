@@ -1,33 +1,31 @@
 package com.ozank.cpathway.dataclasses;
 
-import com.ozank.cpathway.simulation.Reaction;
-
 import java.util.HashMap;
 import java.util.Set;
 
 public class ReactionDataModel {
-    private HashMap<String, HashMap<String, Reaction>> theReactionMap;
+    private HashMap<String, HashMap<String, ReactionData>> reactionData;
     private HashMap<String,HashMap<String,String>> participantNames;
 
     public ReactionDataModel(String species, Set<String> chosenPathways) {
-        ReactionData reactionData = new ReactionData();
-        SpeciesReactions theReactionMap = reactionData.getTheMap().get(species);
-        this.theReactionMap = new HashMap<>();
+        AllReactionData allReactionData = new AllReactionData();
+        SpeciesReactions allReactionsOfChosenSpecies = allReactionData.getAllReactionData().get(species);
+        this.reactionData = new HashMap<>();
         this.participantNames = new HashMap<>();
         for (String pathway : chosenPathways) {
-            HashMap<String,Reaction> pathwayReactions = new HashMap<>();
-            if (theReactionMap.getReactionsInPathways().containsKey(pathway)) {
-                for (String reaction : theReactionMap.getReactionsInPathways().get(pathway)) {
-                    pathwayReactions.put(reaction,theReactionMap.getReactionParticipants().get(reaction));
-                    participantNames.put(reaction,theReactionMap.getParticipantNames().get(reaction));
+            HashMap<String,ReactionData> pathwayReactions = new HashMap<>();
+            if (allReactionsOfChosenSpecies.getReactionsInPathways().containsKey(pathway)) {
+                for (String reaction : allReactionsOfChosenSpecies.getReactionsInPathways().get(pathway)) {
+                    pathwayReactions.put(reaction,allReactionsOfChosenSpecies.getReactionParticipants().get(reaction));
+                    participantNames.put(reaction,allReactionsOfChosenSpecies.getParticipantNames().get(reaction));
                 }
-                this.theReactionMap.put(pathway,pathwayReactions);
+                this.reactionData.put(pathway,pathwayReactions);
             }
         }
     }
 
-    public HashMap<String, HashMap<String, Reaction>> getTheReactionMap() {
-        return theReactionMap;
+    public HashMap<String, HashMap<String, ReactionData>> getReactionData() {
+        return reactionData;
     }
 
     public HashMap<String, HashMap<String, String>> getParticipantNames() {

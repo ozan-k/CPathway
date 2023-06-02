@@ -4,39 +4,33 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ReactionComponent {
-    private Map<Integer,Integer> reactionComponents= new HashMap<>();
+    private Map<Integer,Integer> component = new HashMap<>();
 
-    public  ReactionComponent(){}
-    public ReactionComponent(Set<Pair<Integer>> list){
-        for (Pair<Integer> p : list) {
-            reactionComponents.put(p.getIndex(), p.getCount());
-        }
+    public ReactionComponent(){}
+    public ReactionComponent(Map<Integer,Integer> component){
+        this.component = component;
     }
 
-    public Map<Integer, Integer> getReactionComponents() {
-        return reactionComponents;
+    public Map<Integer, Integer> getComponent() {
+        return component;
     }
 
-    public boolean containsKey(int key){
-        return reactionComponents.containsKey(key);
+    public Integer get(Integer key){
+        return component.get(key);
     }
 
-    public int get(int key){
-        return reactionComponents.get(key);
+    public Set<Integer> keySet(){
+        return component.keySet();
     }
 
-    public Set<Integer> getKeys(){
-        return reactionComponents.keySet();
+    public String toString(List<String> moleculesList){
+        String mapAsString = component.keySet().stream()
+                .map(key -> "[" + moleculesList.get(key)  + "," + component.get(key) + "]")
+                .collect(Collectors.joining(" + ", " ", " "));
+        return mapAsString;
     }
 
-    public String myToString(List<String> moleculesList) {
-        String result = "";
-        for (Integer moleculeIndex : reactionComponents.keySet()){
-            result += "[" + moleculesList.get(moleculeIndex)
-                    + "," + reactionComponents.get(moleculeIndex) + "] ";
-        }
-        return result;
-    }
 }

@@ -5,41 +5,46 @@ import java.util.stream.Collectors;
 
 public class SimulationModel {
 
-    private int[] state;
-    private double[] reactionRates;
-    private ReactionComponent[] left;
-    private ReactionComponent[] right;
-    private DependentReactions[] reactionDependencies;
-    private List<String> moleculesList;
-    private Map<String,Integer>  speciesMap;
+    private final int[] state;
+    private final String[] reactionIds;
+    private final double[] reactionRates;
+    private final ReactionComponent[] left;
+    private final ReactionComponent[] right;
+    private final DependentReactions[] reactionDependencies;
+    private final List<String> moleculesList;
+    private final Map<String,Integer>  speciesMap;
 
-    public SimulationModel(List<Reaction> reactions,Set<Pair<String>> initialState){
+
+    public SimulationModel(List<Reaction> reactions,Map<String,Integer> initialState){
         int size = reactions.size()+1;
 
+        reactionIds = new String[size];
         reactionRates = new double[size];
         left = new ReactionComponent[size];
         right = new ReactionComponent[size];
 
-        moleculesList = getMoleculesList(reactions,initialState);
-        speciesMap = getSpeciesMap(moleculesList);
+        moleculesList = computeMoleculesList(reactions,initialState);
+        speciesMap = computeSpeciesMap(moleculesList);
 
         state = new int[speciesMap.size()];
-        for (Pair p : initialState){
-            state[speciesMap.get(p.getName())] = p.getCount();
+        for (String p : initialState.keySet()){
+            state[speciesMap.get(p)] = initialState.get(p);
         }
 
         int counter = 1;
+        setInitAsReactionZero();
         for (Reaction r : reactions){
+            reactionIds[counter] = r.getId();
             reactionRates[counter] = r.getRate();
-            left[counter] = new ReactionComponent(r.getReactantsStoic(speciesMap));
-            right[counter] = new ReactionComponent(r.getProductsStoic(speciesMap));
+            left[counter] = new ReactionComponent(r.getReactantsAsIntegerMap(speciesMap));
+            right[counter] = new ReactionComponent(r.getProductsAsIntegerMap(speciesMap));
             counter++;
         }
 
         reactionDependencies = new DependentReactions[size];
         for (int i = 1; i < reactionRates.length; i++){
-            Set<Integer> moleculesLeft = left[i].getKeys();
-            Set<Integer> moleculesRight = right[i].getKeys();
+            Set<Integer> moleculesLeft = left[i].keySet();
+            Set<Integer> moleculesRight = right[i].keySet();
             List<Set<Integer>> setList =
                     List.of(moleculesLeft, moleculesRight);
             Set<Integer> moleculesAll = setList.stream()
@@ -49,20 +54,19 @@ public class SimulationModel {
         }
     }
 
-    private List<String> getMoleculesList(List<Reaction> reactions,
-                                                     Set<Pair<String>> initialState) {
-        Set<String> molecules = new TreeSet();
+
+    private List<String> computeMoleculesList(List<Reaction> reactions,
+                                              Map<String,Integer> initialState) {
+        Set<String> molecules = new TreeSet<>();
         for (Reaction r : reactions) {
             molecules.addAll(getReactionComponentSpecies(r.getReactants()));
             molecules.addAll(getReactionComponentSpecies(r.getProducts()));
         }
-        for (Pair<String> p : initialState) {
-            molecules.add(p.getName());
-        }
+        molecules.addAll(initialState.keySet());
         return molecules.stream().toList();
     }
 
-    private  Map<String,Integer> getSpeciesMap(List<String> molecules){
+    private  Map<String,Integer> computeSpeciesMap(List<String> molecules){
         Map<String,Integer> speciesMap = new HashMap<>();
         for (int i=0; i < molecules.size() ; i++){
             speciesMap.put(molecules.get(i),i);
@@ -70,46 +74,58 @@ public class SimulationModel {
         return speciesMap;
     }
 
-    private static Set<String> getReactionComponentSpecies(Set<Pair<String>> set){
-        return set.stream().map(pair -> pair.getName()).collect(Collectors.toSet());
+    private static Set<String> getReactionComponentSpecies(Map<String,Integer> moleculeMap){
+        return moleculeMap.keySet();
     }
 
 
     private DependentReactions getReactionDependenciesOf(Set<Integer> molecules){
         DependentReactions result = new DependentReactions();
         for (int i =1; i<left.length; i++){
-            if (left[i].getKeys()
+            if (left[i].keySet()
                     .stream()
-                    .filter(x -> molecules.contains(x))
-                    .findAny()
-                    .isPresent()){
+                    .anyMatch(molecules::contains)
+            ){
                 result.add(i);
             }
         }
         return result;
-    };
+    }
+
+    // -----------------------------------------------
+
+    private void setInitAsReactionZero(){
+        reactionIds[0] = "init";
+        reactionRates[0] = 0;
+        left[0] = new ReactionComponent();
+        Map<Integer,Integer> reactionZeroRight = new HashMap<>();
+        for (int i = 0; i< state.length;i++){
+            if (state[i] >0){
+                int count = state[i];
+                reactionZeroRight.put(i,count);
+            }
+        }
+        right[0] = new ReactionComponent(reactionZeroRight);
+    }
+
     // -----------------------------------------------
 
     public int[] getState() {
         return state;
     }
-
+    public String[] getReactionIds(){ return reactionIds; }
     public double[] getReactionRates() {
         return reactionRates;
     }
-
     public ReactionComponent[] getLeft() {
         return left;
     }
-
     public ReactionComponent[] getRight() {
         return right;
     }
-
     public DependentReactions[] getReactionDependencies() {
         return reactionDependencies;
     }
-
     public List<String> getMoleculesList() {
         return moleculesList;
     }
@@ -131,10 +147,10 @@ public class SimulationModel {
     public void printReactions(){
         System.out.println("Model reactions");
         for (int i = 1; i<left.length;i++){
-            System.out.println(i + " : "
-                    + left[i].myToString(moleculesList)
+            System.out.println(i + " - " + reactionIds[i] + " : "
+                    + left[i].toString(moleculesList)
                     + "--> "
-                    + right[i].myToString(moleculesList)
+                    + right[i].toString(moleculesList)
                     + ", " + reactionRates[i] );
         }
         System.out.println();
@@ -147,5 +163,4 @@ public class SimulationModel {
         }
         System.out.println();
     }
-
 }

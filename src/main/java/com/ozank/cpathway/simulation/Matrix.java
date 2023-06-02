@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class Matrix<T> {
-    private Map<T,Integer> matrix = new HashMap<>();
+    private final Map<T,Integer> matrix = new HashMap<>();
 
     public Map<T, Integer> getMatrixM() {
         return matrix;
@@ -24,11 +24,11 @@ public class Matrix<T> {
         return matrix.containsKey(p);
     }
     public void increment(T p){
-        int value = ( matrix.containsKey(p) ? matrix.get(p) : 0);
+        int value = matrix.getOrDefault(p,0);
         matrix.put(p, value+1);
     }
     public void add(T p,int addedValue){
-        int value = ( matrix.containsKey(p) ? matrix.get(p) : 0);
+        int value = matrix.getOrDefault(p,0);
         matrix.put(p, value + addedValue);
     }
 

@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class DependentReactions {
-    private Set<Integer> dependentReactions;
+    private final Set<Integer> dependentReactions;
 
     public DependentReactions() {
         this.dependentReactions = new HashSet<>();

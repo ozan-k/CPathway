@@ -70,7 +70,7 @@ public class SimulationSSA {
         int moleculeCount;
         double result = reactionRates[i];
         ReactionComponent left = reactionsLeft[i];
-        for (Integer moleculeIndex : left.getKeys()){
+        for (Integer moleculeIndex : left.keySet()){
             moleculeCount = state[moleculeIndex];
             if (moleculeCount==0) { return 0; }
             result *= combinatorial(moleculeCount,left.get(moleculeIndex));
@@ -108,8 +108,8 @@ public class SimulationSSA {
     private void updateState(int reactionIndex){
         ReactionComponent left = reactionsLeft[reactionIndex];
         ReactionComponent right = reactionsRight[reactionIndex];
-        for (int i : left.getKeys()){ state[i] -= left.get(i); }
-        for (int i : right.getKeys()){state[i] += right.get(i);}
+        for (int i : left.keySet()){ state[i] -= left.get(i); }
+        for (int i : right.keySet()){state[i] += right.get(i);}
     }
 
 
@@ -137,7 +137,7 @@ public class SimulationSSA {
 
     private void updateFluxes(int reactionIndex){
         ReactionComponent left = reactionsLeft[reactionIndex];
-        for (Integer speciesIndex : left.getKeys()){
+        for (Integer speciesIndex : left.keySet()){
             for (int i=0;i< left.get(speciesIndex);i++){
                 int sourceReaction = getReactionOrigin(speciesIndex);
                 matrixM.decrement(new PairIndex(speciesIndex,sourceReaction));
@@ -147,7 +147,7 @@ public class SimulationSSA {
         }
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         ReactionComponent right = reactionsRight[reactionIndex];
-        for (Integer speciesIndex : right.getKeys()){
+        for (Integer speciesIndex : right.keySet()){
             matrixM.add(new PairIndex(speciesIndex,reactionIndex),right.get(speciesIndex));
             state_y[speciesIndex] += right.get(speciesIndex);
         }

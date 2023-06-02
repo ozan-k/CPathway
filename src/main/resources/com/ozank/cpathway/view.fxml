@@ -33,12 +33,9 @@
                 <Button fx:id="okButton" text="OK" minWidth="40" onAction="#onChooseSpecies"/>
             </HBox>
             <HBox GridPane.rowIndex="0" GridPane.columnIndex="1" spacing="5" alignment="center">
-                <Button fx:id="submitPathwaysButton" text="Submit Pathways" minWidth="120"/>
-<!--                        onAction="#onSubmitPathways"/>-->
-                <Button fx:id="resetButton" text="Reset" minWidth="50"/>
-<!--                        onAction="#onReset"/>-->
-                <Button fx:id="runExperimentButton" text="Run" minWidth="50"/>
-<!--                onAction="#onRunExperiment"/>-->
+                <Button fx:id="submitPathwaysButton" text="Submit Pathways" minWidth="120" onAction="#onSubmitPathways"/>
+                <Button fx:id="resetButton" text="Reset" minWidth="50" onAction="#onReset"/>
+                <Button fx:id="runExperimentButton" text="Run" minWidth="50" onAction="#onRunExperiment"/>
                 <Label text=" Perturbation (%)">
                     <font>
                         <Font name="Arial italic" size="14"/>

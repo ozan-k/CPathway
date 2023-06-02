@@ -1,16 +1,14 @@
 package com.ozank.cpathway.dataclasses;
 
-import com.ozank.cpathway.simulation.Reaction;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class SpeciesReactions {
-    private HashMap<String,Reaction> reactionParticipants;
+    private HashMap<String, ReactionData> reactionParticipants;
     private HashMap<String, ArrayList<String>> reactionsInPathways;
     private HashMap<String,HashMap<String,String>> participantNames;
 
-    public SpeciesReactions(HashMap<String, Reaction> reactionParticipants,
+    public SpeciesReactions(HashMap<String, ReactionData> reactionParticipants,
                             HashMap<String, ArrayList<String>> reactionsInPathways,
                             HashMap<String, HashMap<String, String>> participantNames) {
         this.reactionParticipants = reactionParticipants;
@@ -18,7 +16,7 @@ public class SpeciesReactions {
         this.participantNames = participantNames;
     }
 
-    public HashMap<String, Reaction> getReactionParticipants() {
+    public HashMap<String, ReactionData> getReactionParticipants() {
         return reactionParticipants;
     }
 
