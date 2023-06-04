@@ -73,6 +73,14 @@ public class Controller implements Initializable {
 
     HostServices hostServices;
 
+    public HostServices getHostServices() {
+        return hostServices ;
+    }
+
+    public void setHostServices(HostServices hostServices) {
+        this.hostServices = hostServices ;
+    }
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         start();
@@ -81,10 +89,13 @@ public class Controller implements Initializable {
     public void start() {
         initiateSpeciesSelection();
         disableControls();
-        tester();
+        //tester();
     }
 
+
+
     public void tester(){
+        System.out.println("#" + getHostServices());
         speciesComboBox.setValue("Homo sapiens");
         onChooseSpecies();
     }
@@ -106,10 +117,44 @@ public class Controller implements Initializable {
             @Override
             public Void call() //throws InterruptedException
             {
-                long simulationNumber = simulationNumberSpinner.getValue();
+                int simulationNumber = simulationNumberSpinner.getValue();
                 updateProgress(simulationNumber, simulationNumber*2);
-                runExperiments();
+                int moleculeNumber = moleculeNumberSpinner.getValue();
+                int perturbation = (int) Math.round(perturbationSlider.getValue());
+                ModelBuilder modelBuilder = new ModelBuilder(modelReactions, modelMolecules, moleculeNumber, perturbation);
+                Map<String,Integer> perturbed = modelBuilder.getCaseInitialState();
+                Map<String,Integer> control = modelBuilder.getControlInitialState();
+                Simulation simulation;
+
+                // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                Matrix<TripleIndex> resultMatrix = new Matrix<>();
+                SimulationModel modelPerturbed = new SimulationModel(modelBuilder.getReactions(),perturbed);
+                for (int i=0; i<simulationNumber; i++) {
+                    updateProgress(i+1, simulationNumber*2);
+                    simulation = new Simulation(modelPerturbed);
+                    simulation.simulateWithStepNumber(83);
+                    for (int j =84;j< 100;j++){
+                        simulation.simulateWithStepNumber(100*moleculeNumber);
+                    }
+                    resultMatrix.matrixAddition(simulation.getF());
+                }
+                resultMatrix.divideByScalar(simulationNumber);
+                // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                Matrix<TripleIndex> controlMatrix = new Matrix<>();
+                SimulationModel modelControl = new SimulationModel(modelBuilder.getReactions(), control);
+                for (int i=0; i<simulationNumber; i++) {
+                    updateProgress(simulationNumber+i+1, simulationNumber*2);
+                    simulation = new Simulation(modelControl);
+                    simulation.simulateWithStepNumber(100*moleculeNumber);
+                    controlMatrix.matrixAddition(simulation.getF());
+                }
+                controlMatrix.divideByScalar(simulationNumber);
+                // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                resultMatrix.matrixSubtraction(controlMatrix);
+                fluxGraph = new FluxGraph(resultMatrix);
+                // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 Platform.runLater(() -> {
+                    System.out.println("yes");
                     //HashSet<String> fluxMolecules = getFluxMolecules(fluxGraph);
                     //fluxGraph.listFluxGraph(centerPaneVBox,mainBorderPane,deselectedMolecules,10,true);
                     //initiateFluxControls(fluxMolecules);
@@ -126,44 +171,15 @@ public class Controller implements Initializable {
         thread.start();
     }
 
-    private Matrix<TripleIndex> runExperiments(){
-        int moleculeNumber = moleculeNumberSpinner.getValue();
-        int perturbation = (int) Math.round(perturbationSlider.getValue());
-        ModelBuilder modelBuilder = new ModelBuilder(modelReactions, modelMolecules, moleculeNumber, perturbation);
-        Map<String,Integer> perturbed = modelBuilder.getCaseInitialState();
-        Map<String,Integer> control = modelBuilder.getControlInitialState();
-        Matrix<TripleIndex> result = new Matrix<>();
-
-        System.out.println(perturbation);
-        SimulationModel modelControl = new SimulationModel(modelBuilder.getReactions(),control);
-        //  Simulation simulation;
-//        for (int i=0;i<2;i++){
-//            simulation = new Simulation(model);
-//            simulation.simulateWithStepNumber(100*moleculeNumber);
-//            simulation.getF();
-//            System.out.println("-----");
-//        }
-        Matrix<TripleIndex> perturbedM = new Matrix<>();
-        modelControl.printReactions();
-        modelControl.printState();
-
-        System.out.println();
-        System.out.println();
-        SimulationModel modelCase = new SimulationModel(modelBuilder.getReactions(),perturbed);
-        modelCase.printReactions();
-        modelCase.printState();
-
-        return perturbedM;
-    }
 
 
     @FXML
     protected void onChooseSpecies() {
-        //        if (hostServices==null){
-        //            setGetHostController(dummyMolecule.getHostServices());
-        //        } else {
-        //            dummyMolecule.setHostServices(hostServices);
-        //        }
+        if (hostServices==null){
+            setHostServices(Molecule.getHostServices());
+        } else {
+            Molecule.setHostServices(hostServices);
+        }
         boolean check = !speciesComboBox.getSelectionModel().isEmpty() && !speciesComboBox.getValue().equals("Select species");
         if (check) {
             String choiceKey = speciesComboBox.getValue().replace(" ", "_");

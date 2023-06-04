@@ -7,17 +7,19 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.net.URL;
+
 
 public class CPathway extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(CPathway.class.getResource("view.fxml"));
         Parent root = fxmlLoader.load();
+        Controller fXMLDocumentController = fxmlLoader.getController();
         Scene scene = new Scene(root, 700, 600);
         stage.setTitle("CPathway");
         stage.setScene(scene);
         stage.show();
+        fXMLDocumentController.setHostServices(getHostServices());
     }
 
     public static void main(String[] args) {

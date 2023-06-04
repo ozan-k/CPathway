@@ -84,13 +84,14 @@ class SimulationSSATest {
     @Test
     public void simulationTest1c(){
         SimulationModel simulationModel = new SimulationModel(reactions1,initState1);
-        SimulationSSA simulation = new SimulationSSA(simulationModel);
+        SimulationSSA simulation;
+        simulation = new SimulationSSA(simulationModel);
         simulation.simulateWithTimeLimit(0.25);
         simulation.printFluxes();
         System.out.println();
-        SimulationSSA simulation1 = new SimulationSSA(simulationModel);
-        simulation1.simulateWithTimeLimit(0.25);
-        simulation1.printFluxes();
+        simulation = new SimulationSSA(simulationModel);
+        simulation.simulateWithTimeLimit(0.25);
+        simulation.printFluxes();
     }
 
 

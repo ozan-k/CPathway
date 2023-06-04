@@ -58,4 +58,65 @@ class MatrixTest {
         assertEquals(2,f.get(new TripleIndex(1,1,1)));
     }
 
+    @Test
+    public void matrixAdditionTest(){
+        Matrix<TripleIndex> m1 = new Matrix<>();
+        m1.add(new TripleIndex(1,1,1),2);
+        m1.add(new TripleIndex(1,2,1),5);
+        m1.add(new TripleIndex(1,1,2),4);
+        Matrix<TripleIndex> m2 = new Matrix<>();
+        m2.add(new TripleIndex(1,1,1),2);
+        m2.add(new TripleIndex(1,2,1),3);
+        m2.add(new TripleIndex(1,1,4),9);
+        //~~~~~~~~~~~~~~~~~~~~~
+        m1.matrixAddition(m2);
+        for (TripleIndex t : m1.keySet()){
+            System.out.println(t + " : " + m1.get(t));
+        }
+        assertEquals(4,m1.get(new TripleIndex(1,1,1)));
+        assertEquals(8,m1.get(new TripleIndex(1,2,1)));
+        assertEquals(4,m1.get(new TripleIndex(1,1,2)));
+        assertEquals(9,m1.get(new TripleIndex(1,1,4)));
+    }
+
+    @Test
+    public void matrixRemovalTest(){
+        Matrix<TripleIndex> m1 = new Matrix<>();
+        m1.add(new TripleIndex(1,1,1),2);
+        m1.add(new TripleIndex(1,2,1),5);
+        m1.add(new TripleIndex(1,1,2),4);
+        Matrix<TripleIndex> m2 = new Matrix<>();
+        m2.add(new TripleIndex(1,1,1),2);
+        m2.add(new TripleIndex(1,2,1),3);
+        m2.add(new TripleIndex(1,1,4),9);
+        m1.matrixSubtraction(m2);
+        // ~~~~~~~~~~~~~~~~~~~~~~~
+        for (TripleIndex t : m1.keySet()){
+            System.out.println(t + " : " + m1.get(t));
+        }
+        assertEquals(0,m1.get(new TripleIndex(1,1,1)));
+        assertEquals(2,m1.get(new TripleIndex(1,2,1)));
+        assertEquals(4,m1.get(new TripleIndex(1,1,2)));
+        assertEquals(-9,m1.get(new TripleIndex(1,1,4)));
+    }
+
+    @Test
+    public void matrixDivisionTest(){
+        Matrix<TripleIndex> m1 = new Matrix<>();
+        m1.add(new TripleIndex(1,1,1),2);
+        m1.add(new TripleIndex(1,2,1),5);
+        m1.add(new TripleIndex(1,1,2),4);
+        m1.add(new TripleIndex(1,1,4),9);
+        m1.divideByScalar(2);
+        // ~~~~~~~~~~~~~~~~~~~~~~~
+        for (TripleIndex t : m1.keySet()){
+            System.out.println(t + " : " + m1.get(t));
+        }
+        assertEquals(1,m1.get(new TripleIndex(1,1,1)));
+        assertEquals(2,m1.get(new TripleIndex(1,2,1)));
+        assertEquals(2,m1.get(new TripleIndex(1,1,2)));
+        assertEquals(4,m1.get(new TripleIndex(1,1,4)));
+    }
+
+
 }

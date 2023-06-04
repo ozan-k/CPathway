@@ -32,6 +32,11 @@ public class Matrix<T> {
         matrix.put(p, value + addedValue);
     }
 
+    public void remove(T p,int removedValue){
+        int value = matrix.getOrDefault(p,0);
+        matrix.put(p, value - removedValue);
+    }
+
     public void decrement(T p){
         if (!matrix.containsKey(p)){
             throw new IllegalArgumentException();
@@ -41,6 +46,24 @@ public class Matrix<T> {
             throw new IllegalArgumentException();
         }
         matrix.put(p,value-1);
+    }
+
+    public void matrixAddition(Matrix<T> otherMatrix){
+        for (T index : otherMatrix.keySet()){
+            add(index,otherMatrix.get(index));
+        }
+    }
+
+    public void matrixSubtraction(Matrix<T> otherMatrix){
+        for (T index : otherMatrix.keySet()){
+            remove(index,otherMatrix.get(index));
+        }
+    }
+
+    public void divideByScalar(int denominator){
+        for (T index : matrix.keySet()){
+            matrix.put(index,matrix.get(index)/denominator);
+        }
     }
 
     public Set<T> keySet(){

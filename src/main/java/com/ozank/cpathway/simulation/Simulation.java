@@ -1,21 +1,25 @@
 package com.ozank.cpathway.simulation;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 public class Simulation {
-    Random r = new Random();
+    Random r = new Random(1);
     private final SimulationModel model;
     private final Matrix<PairIndex> matrixM;
     private final Matrix<TripleIndex> matrixF;
     private final double[] aj;
     private final int[] state;
     private final int[] state_y;
+
+    private final String[] reactionIds;
     private final ReactionComponent[] reactionsLeft;
     private final ReactionComponent[] reactionsRight;
     private final double[] reactionRates;
     private final DependentReactions[] reactionDependencies;
 
+    private final List<String> moleculesList;
 
     public Simulation(SimulationModel model){
         this.model = model;
@@ -28,6 +32,8 @@ public class Simulation {
         reactionsRight = model.getRight();
         reactionRates = model.getReactionRates();
         reactionDependencies = model.getReactionDependencies();
+        reactionIds = model.getReactionIds();
+        moleculesList = model.getMoleculesList();
 
         aj = new double[reactionsLeft.length];
         for (int i = 1; i<reactionsLeft.length;i++) {
@@ -44,15 +50,14 @@ public class Simulation {
 
     private double computePropensity(int i){
         int moleculeCount;
-        double result = reactionRates[i];
+        double max = 0;
         ReactionComponent left = reactionsLeft[i];
         for (Integer moleculeIndex : left.keySet()){
             moleculeCount = state[moleculeIndex];
-            if (moleculeCount==0) { return 0; }
-            result *= moleculeCount;
-            //result *= combinatorial(moleculeCount,left.get(moleculeIndex));
+            if (moleculeCount==0 || left.get(moleculeIndex) > moleculeCount) { return 0; }
+            if (moleculeCount > max) { max = moleculeCount; }
         }
-        return result;
+        return max * reactionRates[i];
     }
 
     private int computeNextReaction(){
@@ -160,6 +165,22 @@ public class Simulation {
     public void printFluxes(){
         for (TripleIndex t : matrixF.keySet()){
             System.out.println(t.toString(model.getMoleculesList()) + " : " + matrixF.get(t));
+        }
+    }
+
+    public String reactionIdOf(Integer i){
+        return reactionIds[i];
+    }
+
+    public String[] getReactionIds(){
+        return reactionIds;
+    }
+
+    public void printState(){
+        for (int i=0;i<state.length;i++){
+            if (state[i] >0){
+                System.out.println(moleculesList.get(i) + " : " + state[i]);
+            }
         }
     }
 

@@ -34,23 +34,15 @@ public class Molecule implements Comparable<Molecule>{
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 String value = choiceComboBox.getValue();
-                // System.out.println("value: " + value);
                 if (value.equals("Up")){
                     perturbedUpMolecules.add(stId);
                     if (perturbedDownMolecules.contains(stId)){ perturbedDownMolecules.remove(stId);}
-                    // System.out.println(stId+" up");
-                    // System.out.println(perturbedUpMolecules);
                 } else if (value.equals("Down")){
                     perturbedDownMolecules.add(stId);
                     if (perturbedUpMolecules.contains(stId)){ perturbedUpMolecules.remove(stId);}
-                    // System.out.println(stId + " down");
-                    // System.out.println(perturbedDownMolecules);
                 } else {
                     if (perturbedUpMolecules.contains(stId)){ perturbedUpMolecules.remove(stId);}
                     if (perturbedDownMolecules.contains(stId)){ perturbedDownMolecules.remove(stId);}
-                    // System.out.println(stId+"--");
-                    // System.out.println(perturbedUpMolecules);
-                    // System.out.println(perturbedDownMolecules);
                 }
             }
         });
@@ -99,7 +91,7 @@ public class Molecule implements Comparable<Molecule>{
         Molecule.hostServices = hostServices;
     }
 
-    public HostServices getHostServices(){
+    public static HostServices getHostServices(){
         return Molecule.hostServices;
     }
 
