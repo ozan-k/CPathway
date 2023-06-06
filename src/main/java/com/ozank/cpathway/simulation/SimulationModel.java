@@ -4,7 +4,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class SimulationModel {
-
     private final int[] state;
     private final String[] reactionIds;
     private final double[] reactionRates;

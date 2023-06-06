@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 public class Simulation {
-    Random r = new Random(1);
+    Random r = new Random();
     private final SimulationModel model;
     private final Matrix<PairIndex> matrixM;
     private final Matrix<TripleIndex> matrixF;

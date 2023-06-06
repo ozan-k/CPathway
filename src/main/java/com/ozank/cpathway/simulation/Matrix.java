@@ -57,6 +57,7 @@ public class Matrix<T> {
     public void matrixSubtraction(Matrix<T> otherMatrix){
         for (T index : otherMatrix.keySet()){
             remove(index,otherMatrix.get(index));
+            if (matrix.get(index)==0) { matrix.remove(index); }
         }
     }
 

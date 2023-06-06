@@ -9,11 +9,15 @@ import com.ozank.cpathway.simulation.SimulationModel;
 import com.ozank.cpathway.simulation.TripleIndex;
 import javafx.application.HostServices;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -21,13 +25,18 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
@@ -92,8 +101,6 @@ public class Controller implements Initializable {
         //tester();
     }
 
-
-
     public void tester(){
         System.out.println("#" + getHostServices());
         speciesComboBox.setValue("Homo sapiens");
@@ -125,17 +132,13 @@ public class Controller implements Initializable {
                 Map<String,Integer> perturbed = modelBuilder.getCaseInitialState();
                 Map<String,Integer> control = modelBuilder.getControlInitialState();
                 Simulation simulation;
-
                 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 Matrix<TripleIndex> resultMatrix = new Matrix<>();
                 SimulationModel modelPerturbed = new SimulationModel(modelBuilder.getReactions(),perturbed);
                 for (int i=0; i<simulationNumber; i++) {
                     updateProgress(i+1, simulationNumber*2);
                     simulation = new Simulation(modelPerturbed);
-                    simulation.simulateWithStepNumber(83);
-                    for (int j =84;j< 100;j++){
-                        simulation.simulateWithStepNumber(100*moleculeNumber);
-                    }
+                    simulation.simulateWithStepNumber(100*moleculeNumber);
                     resultMatrix.matrixAddition(simulation.getF());
                 }
                 resultMatrix.divideByScalar(simulationNumber);
@@ -151,13 +154,12 @@ public class Controller implements Initializable {
                 controlMatrix.divideByScalar(simulationNumber);
                 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 resultMatrix.matrixSubtraction(controlMatrix);
-                fluxGraph = new FluxGraph(resultMatrix);
+                fluxGraph = new FluxGraph(resultMatrix,modelControl,moleculeNames,hostServices);
                 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 Platform.runLater(() -> {
-                    System.out.println("yes");
-                    //HashSet<String> fluxMolecules = getFluxMolecules(fluxGraph);
-                    //fluxGraph.listFluxGraph(centerPaneVBox,mainBorderPane,deselectedMolecules,10,true);
-                    //initiateFluxControls(fluxMolecules);
+                    HashSet<String> fluxMolecules = fluxGraph.getFluxMolecules();
+                    fluxGraph.listFluxGraph(centerPaneVBox,mainBorderPane,deselectedMolecules,10,true);
+                    initiateFluxControls(fluxMolecules);
                 });
                 return null;
             }
@@ -170,7 +172,6 @@ public class Controller implements Initializable {
         Thread thread = new Thread(task);
         thread.start();
     }
-
 
 
     @FXML
@@ -406,7 +407,6 @@ public class Controller implements Initializable {
         return t.repeat(n-1);
     }
 
-
     private void disableControls() {
         runExperimentButton.setDisable(true);
         submitPathwaysButton.setDisable(true);
@@ -467,4 +467,147 @@ public class Controller implements Initializable {
         stage.show();
         //setGetHostController(dummyMolecule.getHostServices());
     }
+
+    private void initiateFluxControls(HashSet<String> fluxMolecules){
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        topGridPane.setAlignment(Pos.TOP_LEFT);
+        topGridPane.prefHeightProperty().set(160);
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        Label fluxSpinnerLabel = new Label("Flux cut-off");
+        fluxSpinnerLabel.setFont(new Font("Arial italic", 14));
+        Spinner fluxCutoffSpinner = new Spinner(0, ((int) moleculeNumberSpinner.getValue())^2, 10);
+        fluxCutoffSpinner.setEditable(true);
+        fluxCutoffSpinner.prefWidthProperty().set(90);
+        VBox fluxCutoffSpinnerVBox = new VBox();
+        fluxCutoffSpinnerVBox.alignmentProperty().set(Pos.CENTER);
+        fluxCutoffSpinnerVBox.setSpacing(5);
+        fluxCutoffSpinnerVBox.getChildren().addAll(fluxSpinnerLabel,fluxCutoffSpinner);
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        Button plotButton = new Button("Plot");
+        plotButton.prefWidthProperty().set(90);
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        CheckBox initCheckBox = new CheckBox("Include Init ");
+        initCheckBox.selectedProperty().set(true);
+        fluxCutoffSpinnerVBox.getChildren().addAll(initCheckBox,plotButton);
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        topGridPane.add(fluxCutoffSpinnerVBox,1,0);
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        fluxCutoffSpinner.valueProperty().addListener(
+                (obs, oldValue, newValue) ->
+                        fluxGraph.listFluxGraph(
+                                centerPaneVBox,
+                                mainBorderPane,
+                                deselectedMolecules,
+                                (int) fluxCutoffSpinner.getValue(),
+                                initCheckBox.selectedProperty().get()
+                        )
+        );
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//        !!!!!!!!!!!!!!!!  TO BE INCLUDED !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//        plotButton.setOnAction(
+//                e -> fluxGraph.draw(
+//                        deselectedMolecules,
+//                        (int) fluxCutoffSpinner.getValue(),
+//                        initCheckBox.selectedProperty().get()
+//                )
+//        );
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        initCheckBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                fluxGraph.listFluxGraph(
+                        centerPaneVBox,
+                        mainBorderPane,
+                        deselectedMolecules,
+                        (int) fluxCutoffSpinner.getValue(),
+                        initCheckBox.selectedProperty().get()
+                );
+            }
+        });
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        ArrayList molecules = new ArrayList();
+        ListView<String> listView = new ListView<>();
+        String molecule;
+        for (Molecule m : moleculeData) {
+            molecule = m.getDisplayName();
+            if (fluxMolecules.contains(molecule)) {
+                molecules.add(molecule);
+            }
+        }
+        Collections.sort(molecules);
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        listView.getItems().addAll(molecules);
+        listView.setCellFactory(CheckBoxListCell.forListView(new Callback<String, ObservableValue<Boolean>>() {
+            @Override
+            public ObservableValue<Boolean> call(String item) {
+                BooleanProperty observable = new SimpleBooleanProperty();
+                observable.set(true);
+                observable.addListener((obs, wasSelected, isNowSelected) -> {
+                    if (isNowSelected) {
+                        deselectedMolecules.remove(item);
+                    } else {
+                        deselectedMolecules.add(item);
+                    }
+                    fluxGraph.listFluxGraph(centerPaneVBox,
+                            mainBorderPane, deselectedMolecules,
+                            (int) fluxCutoffSpinner.getValue(),
+                            initCheckBox.selectedProperty().get());
+                });
+                return observable;
+            }
+        }));
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        topGridPane.add(listView,2,0);
+        listView.setPrefWidth(mainBorderPane.widthProperty().get()-180);
+        // listView.setPrefHeight(80);
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        TextField filterMoleculesTextField = new TextField();
+        filterMoleculesTextField.setPromptText("Search");
+        topGridPane.add(filterMoleculesTextField,0,1,3,1);
+        filterMoleculesTextField.setPrefWidth(mainBorderPane.getWidth());
+        mainBorderPane.widthProperty().addListener((obs, oldVal, newVal) -> {
+            filterMoleculesTextField.prefWidthProperty().bind(mainBorderPane.widthProperty());
+        });
+        filterMoleculesTextField.setPromptText("Search");
+        filterMoleculesTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+            molecules.clear();
+            for (Molecule m : moleculeData) {
+                if (m.getDisplayName().substring(0,newValue.length()).equals(newValue) && fluxMolecules.contains(m.getDisplayName())) {
+                    molecules.add(m.getDisplayName());
+                }
+                ///
+            }
+            listView.getItems().clear();
+            listView.getItems().addAll(molecules);
+        });
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save");
+        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("TSV Files", "*.tsv"));
+        //Adding action on the menu item
+        saveGraphTab.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent event) {
+                //Opening a dialog box
+                FileChooser fileChooser = new FileChooser();
+
+                //Set extension filter for text files
+                FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TSV files (*.tsv)", "*.tsv");
+                fileChooser.getExtensionFilters().add(extFilter);
+
+                //Show save file dialog
+                File file = fileChooser.showSaveDialog(topGridPane.getScene().getWindow());
+                if (file != null) {
+//        !!!!!!!!!!!!!!!!  TO BE INCLUDED !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//                    saveTextToFile(
+//                            fluxGraph.buildGraphFile(
+//                                    deselectedMolecules,
+//                                    (int) fluxCutoffSpinner.getValue(),
+//                                    initCheckBox.selectedProperty().get()
+//                            ),file);
+                }
+            }
+        });
+        saveGraphTab.setDisable(false);
+    }
+
 }
