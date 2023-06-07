@@ -76,12 +76,9 @@
         <MenuBar minHeight="10" fx:id="bottomBorderPane">
             <Menu text="File">
                 <items>
-                    <MenuItem text="Save Graph" fx:id="saveGraphTab"/>
-<!--                    onAction="#showSaveDialog"/>-->
-                    <MenuItem text="Restart"/>
-<!--                    onAction="#restartApplication"/>-->
-                    <MenuItem text="Exit"/>
-<!--                    onAction="#handleExit"/>-->
+                    <MenuItem text="Save Graph" fx:id="saveGraphTab" onAction="#showSaveDialog"/>
+                    <MenuItem text="Restart" onAction="#restartApplication"/>
+                    <MenuItem text="Exit" onAction="#handleExit"/>
                 </items>
             </Menu>
         </MenuBar>

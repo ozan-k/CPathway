@@ -44,7 +44,7 @@ public class GraphEdge implements Comparable<GraphEdge> {
         this.sourceURL.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent e) {
-                if (sourceStId.equals("Init")) {
+                if (sourceStId.equals("init")) {
                     Alert a = new Alert(Alert.AlertType.INFORMATION);
                     a.contentTextProperty().set("The source is the initial state.");
                     a.show();

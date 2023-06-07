@@ -38,6 +38,7 @@ import javafx.util.Callback;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.util.*;
 
@@ -158,7 +159,7 @@ public class Controller implements Initializable {
                 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 Platform.runLater(() -> {
                     HashSet<String> fluxMolecules = fluxGraph.getFluxMolecules();
-                    fluxGraph.listFluxGraph(centerPaneVBox,mainBorderPane,deselectedMolecules,10,true);
+                    fluxGraph.generateFluxGraphList(centerPaneVBox,mainBorderPane,deselectedMolecules,10,true);
                     initiateFluxControls(fluxMolecules);
                 });
                 return null;
@@ -494,7 +495,7 @@ public class Controller implements Initializable {
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         fluxCutoffSpinner.valueProperty().addListener(
                 (obs, oldValue, newValue) ->
-                        fluxGraph.listFluxGraph(
+                        fluxGraph.generateFluxGraphList(
                                 centerPaneVBox,
                                 mainBorderPane,
                                 deselectedMolecules,
@@ -503,19 +504,18 @@ public class Controller implements Initializable {
                         )
         );
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//        !!!!!!!!!!!!!!!!  TO BE INCLUDED !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//        plotButton.setOnAction(
-//                e -> fluxGraph.draw(
-//                        deselectedMolecules,
-//                        (int) fluxCutoffSpinner.getValue(),
-//                        initCheckBox.selectedProperty().get()
-//                )
-//        );
+        plotButton.setOnAction(
+                e -> fluxGraph.draw(
+                        deselectedMolecules,
+                        (int) fluxCutoffSpinner.getValue(),
+                        initCheckBox.selectedProperty().get()
+                )
+        );
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         initCheckBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                fluxGraph.listFluxGraph(
+                fluxGraph.generateFluxGraphList(
                         centerPaneVBox,
                         mainBorderPane,
                         deselectedMolecules,
@@ -548,7 +548,7 @@ public class Controller implements Initializable {
                     } else {
                         deselectedMolecules.add(item);
                     }
-                    fluxGraph.listFluxGraph(centerPaneVBox,
+                    fluxGraph.generateFluxGraphList(centerPaneVBox,
                             mainBorderPane, deselectedMolecules,
                             (int) fluxCutoffSpinner.getValue(),
                             initCheckBox.selectedProperty().get());
@@ -597,17 +597,37 @@ public class Controller implements Initializable {
                 //Show save file dialog
                 File file = fileChooser.showSaveDialog(topGridPane.getScene().getWindow());
                 if (file != null) {
-//        !!!!!!!!!!!!!!!!  TO BE INCLUDED !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//                    saveTextToFile(
-//                            fluxGraph.buildGraphFile(
-//                                    deselectedMolecules,
-//                                    (int) fluxCutoffSpinner.getValue(),
-//                                    initCheckBox.selectedProperty().get()
-//                            ),file);
+                    saveTextToFile(
+                            fluxGraph.buildGraphFile(
+                                    deselectedMolecules,
+                                    (int) fluxCutoffSpinner.getValue(),
+                                    initCheckBox.selectedProperty().get()
+                            ),file);
                 }
             }
         });
         saveGraphTab.setDisable(false);
+    }
+    private void saveTextToFile(String content, File file) {
+        try {
+            PrintWriter writer;
+            writer = new PrintWriter(file);
+            writer.println(content);
+            writer.close();
+        } catch (IOException ex) {
+            System.out.println("Error");
+            //Logger.getLogger(SaveFileWithFileChooser.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    @FXML
+    void handleExit(){
+        Platform.exit();
+    }
+
+    @FXML
+    void showSaveDialog(){
+        Platform.exit();
     }
 
 }

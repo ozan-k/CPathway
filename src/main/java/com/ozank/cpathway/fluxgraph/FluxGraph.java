@@ -1,5 +1,12 @@
 package com.ozank.cpathway.fluxgraph;
 
+import com.brunomnsilva.smartgraph.containers.SmartGraphDemoContainer;
+import com.brunomnsilva.smartgraph.graph.Digraph;
+import com.brunomnsilva.smartgraph.graph.DigraphEdgeList;
+import com.brunomnsilva.smartgraph.graph.Vertex;
+import com.brunomnsilva.smartgraph.graphview.SmartCircularSortedPlacementStrategy;
+import com.brunomnsilva.smartgraph.graphview.SmartGraphPanel;
+import com.brunomnsilva.smartgraph.graphview.SmartGraphProperties;
 import com.ozank.cpathway.simulation.Matrix;
 import com.ozank.cpathway.simulation.SimulationModel;
 import com.ozank.cpathway.simulation.TripleIndex;
@@ -83,26 +90,11 @@ public class FluxGraph {
                         filteredGraph.add(e);
                     }
                 }
-
-// To be removed
-//                if (includeInit) {
-//                    if (!deselectedMolecules.contains(e.getMoleculeName()) && Math.abs(e.getFlux()) >= cutOffValue) {
-//                        filteredGraph.add(e);
-//                    }
-//                } else {
-//                    if (!e.getSourceStId().equals("Init") &&
-//                            !deselectedMolecules.contains(e.getMoleculeName()) &&
-//                            Math.abs(e.getFlux()) >= cutOffValue) {
-//                        filteredGraph.add(e);
-//                    }
-//                }
-
-
             }
             return filteredGraph;
         }
 
-        public void listFluxGraph(VBox centerControlCheckboxes, BorderPane mainBorderPane, HashSet<String> deselectedMolecules,int cuTOffValue,boolean includeInitSelected){
+        public void generateFluxGraphList(VBox centerControlCheckboxes, BorderPane mainBorderPane, HashSet<String> deselectedMolecules, int cuTOffValue, boolean includeInitSelected){
             centerControlCheckboxes.getChildren().clear();
             ObservableList<GraphEdge> graphData = FXCollections.observableArrayList(this.getFilteredGraph(deselectedMolecules,cuTOffValue,includeInitSelected));
             FXCollections.sort(graphData);
@@ -145,105 +137,103 @@ public class FluxGraph {
             });
         }
 
+        public void draw(HashSet<String> deselectedMolecules,int cuTOffValue, boolean includeInit){
+            // https://github.com/brunomnsilva/JavaFXSmartGraph
+            Digraph<GReaction, GEdge> edges = new DigraphEdgeList<>();
+            HashMap<String, Vertex<GReaction>> reactionsHashMap = new HashMap<>();
+            Vertex vertex;
+            String source;
+            String target;
+            GEdge gEdge;
+            HashMap<String,GEdge> graphEdges = new HashMap<>();
+            for (GraphEdge edge : this.getFilteredGraph(deselectedMolecules,cuTOffValue,includeInit)){
+                source = edge.getSourceStId();
+                target = edge.getTargetStId();
+                if (!reactionsHashMap.containsKey(source)){
+                    vertex = edges.insertVertex(new GReaction(source, ""));
+                    reactionsHashMap.put(source,vertex);
+                }
+                if (!reactionsHashMap.containsKey(target)){
+                    vertex = edges.insertVertex(new GReaction(target, ""));
+                    reactionsHashMap.put(target,vertex);
+                }
+                gEdge = new GEdge(source, target, edge.getFlux(), edge.getMoleculeStId());
+                graphEdges.put(gEdge.toString(),gEdge);
+                edges.insertEdge(reactionsHashMap.get(edge.getSourceStId()),
+                        reactionsHashMap.get(edge.getTargetStId()),
+                        gEdge);
+            }
 
-//        public void draw(HashSet<String> deselectedMolecules,int cuTOffValue, boolean includeInit){
-//            // https://github.com/brunomnsilva/JavaFXSmartGraph
-//            Digraph<GReaction, GEdge> edges = new DigraphEdgeList<>();
-//            HashMap<String, Vertex<GReaction>> reactionsHashMap = new HashMap<>();
-//            Vertex vertex;
-//            String source;
-//            String target;
-//            GEdge gEdge;
-//            HashMap<String,GEdge> graphEdges = new HashMap<>();
-//            for (GraphEdge edge : this.getFilteredGraph(deselectedMolecules,cuTOffValue,includeInit)){
-//                source = edge.getSourceStId();
-//                target = edge.getTargetStId();
-//                if (!reactionsHashMap.containsKey(source)){
-//                    vertex = edges.insertVertex(new GReaction(source, ""));
-//                    reactionsHashMap.put(source,vertex);
-//                }
-//                if (!reactionsHashMap.containsKey(target)){
-//                    vertex = edges.insertVertex(new GReaction(target, ""));
-//                    reactionsHashMap.put(target,vertex);
-//                }
-//                gEdge = new GEdge(source, target, edge.getFlux(), edge.getMoleculeStId());
-//                graphEdges.put(gEdge.toString(),gEdge);
-//                edges.insertEdge(reactionsHashMap.get(edge.getSourceStId()),
-//                        reactionsHashMap.get(edge.getTargetStId()),
-//                        gEdge);
-//            }
-//
-//
-//            String customProps = "edge.label = true" + "\n" + "edge.arrow = true";
-//            SmartGraphProperties properties = new SmartGraphProperties(customProps);
-//            SmartGraphPanel<GReaction, GEdge> graphView = new SmartGraphPanel<>(edges,
-//                    properties,
-//                    new SmartCircularSortedPlacementStrategy());
-//
-//            int k= 1;
-//            int edgeWeight;
-//            for (String s : graphEdges.keySet()) {
-//                edgeWeight = graphEdges.get(s).getWeight();
-//                graphView.getStylableEdge(graphEdges.get(s)).setStyle("-fx-stroke-width: "
-//                        + mapFluxesToWidths(edgeWeight) +";" +
-//                        ( edgeWeight>0 ? "-fx-stroke: #9BD087;" : "-fx-stroke: #FF6D66;"));
-//                // #58ABAE;"
-//                k++;
-//            }
-//            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//            graphView.setVertexDoubleClickAction(graphVertex -> {
-//                hostServices.showDocument("https://reactome.org/content/detail/" +
-//                        graphVertex.getUnderlyingVertex().element().getStId()
-//                );
-//            });
-//
-//            graphView.setEdgeDoubleClickAction(graphEdge -> {
-//                hostServices.showDocument("https://reactome.org/content/detail/" +
-//                        graphEdge.getUnderlyingEdge().element().getStId());
-//            });
-//
-//            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//            Stage fluxStage = new Stage(StageStyle.DECORATED);
-//            fluxStage.setTitle("Flux-Difference Graph");
-//            fluxStage.setMinHeight(500);
-//            fluxStage.setMinWidth(800);
-//            Scene scene = new Scene(new SmartGraphDemoContainer(graphView), 1024, 768);
-//            fluxStage.setScene(scene);
-//            fluxStage.show();
-//            graphView.init();
-//        }
+            String customProps = "edge.label = true" + "\n" + "edge.arrow = true";
+            SmartGraphProperties properties = new SmartGraphProperties(customProps);
+            SmartGraphPanel<GReaction, GEdge> graphView = new SmartGraphPanel<>(edges,
+                    properties,
+                    new SmartCircularSortedPlacementStrategy());
 
-//        private Integer mapFluxesToWidths(Integer weight){
-//            int absWeight = Math.abs(weight);
-//            if (absWeight <4){
-//                return 1;
-//            } else if (absWeight <10){
-//                return 2;
-//            } else if (absWeight <40){
-//                return 3;
-//            } else if (absWeight <100){
-//                return 4;
-//            } else if (absWeight <400){
-//                return 5;
-//            } else if (absWeight <1000){
-//                return 6;
-//            } else if (absWeight <4000){
-//                return 7;
-//            } else {
-//                return 8;
-//            }
-//        }
+            int k= 1;
+            int edgeWeight;
+            for (String s : graphEdges.keySet()) {
+                edgeWeight = graphEdges.get(s).getWeight();
+                graphView.getStylableEdge(graphEdges.get(s)).setStyle("-fx-stroke-width: "
+                        + mapFluxesToWidths(edgeWeight) +";" +
+                        ( edgeWeight>0 ? "-fx-stroke: #9BD087;" : "-fx-stroke: #FF6D66;"));
+                // #58ABAE;"
+                k++;
+            }
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            graphView.setVertexDoubleClickAction(graphVertex -> {
+                hostServices.showDocument("https://reactome.org/content/detail/" +
+                        graphVertex.getUnderlyingVertex().element().getStId()
+                );
+            });
 
-//        public String buildGraphFile(HashSet<String> deselectedMolecules,int cuTOffValue,boolean includeInitSelected){
-//            ArrayList<GraphEdge> graph = this.getFilteredGraph(deselectedMolecules,cuTOffValue,includeInitSelected);
-//            Collections.sort(graph);
-//            String result = "Source\tTarget\tFluxMolecule\tFluxWeight\n";
-//            for (GraphEdge edge :  graph){
-//                result += edge.getSourceStId() + "\t" + edge.getTargetStId() + "\t";
-//                result += edge.getMoleculeStId() + "\t" + edge.getFlux() + "\n";
-//            }
-//            return result;
-//        }
+            graphView.setEdgeDoubleClickAction(graphEdge -> {
+                hostServices.showDocument("https://reactome.org/content/detail/" +
+                        graphEdge.getUnderlyingEdge().element().getStId());
+            });
+
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            Stage fluxStage = new Stage(StageStyle.DECORATED);
+            fluxStage.setTitle("Flux-Difference Graph");
+            fluxStage.setMinHeight(500);
+            fluxStage.setMinWidth(800);
+            Scene scene = new Scene(new SmartGraphDemoContainer(graphView), 1024, 768);
+            fluxStage.setScene(scene);
+            fluxStage.show();
+            graphView.init();
+        }
+
+        private Integer mapFluxesToWidths(Integer weight){
+            int absWeight = Math.abs(weight);
+            if (absWeight <4){
+                return 1;
+            } else if (absWeight <10){
+                return 2;
+            } else if (absWeight <40){
+                return 3;
+            } else if (absWeight <100){
+                return 4;
+            } else if (absWeight <400){
+                return 5;
+            } else if (absWeight <1000){
+                return 6;
+            } else if (absWeight <4000){
+                return 7;
+            } else {
+                return 8;
+            }
+        }
+
+        public String buildGraphFile(HashSet<String> deselectedMolecules,int cuTOffValue,boolean includeInitSelected){
+            ArrayList<GraphEdge> graph = this.getFilteredGraph(deselectedMolecules,cuTOffValue,includeInitSelected);
+            Collections.sort(graph);
+            String result = "Source\tTarget\tFluxMolecule\tFluxWeight\n";
+            for (GraphEdge edge :  graph){
+                result += edge.getSourceStId() + "\t" + edge.getTargetStId() + "\t";
+                result += edge.getMoleculeStId() + "\t" + edge.getFlux() + "\n";
+            }
+            return result;
+        }
 
     }
 
