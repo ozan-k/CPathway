@@ -49,14 +49,14 @@
                     </font>
                 </Label>
                 <Spinner fx:id="moleculeNumberSpinner"  prefWidth="80"  min="1" max="10000"
-                         editable="true" initialValue="1000"/>
+                         editable="false" initialValue="1000"/>
                 <Label text=" Sim. # ">
                     <font>
                         <Font name="Arial italic" size="12"/>
                     </font>
                 </Label>
                 <Spinner fx:id="simulationNumberSpinner"  prefWidth="80"  min="1" max="1000"
-                         editable="true" initialValue="10"/>
+                         editable="false" initialValue="10"/>
             </HBox>
             <Slider GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.columnSpan="2"
                     fx:id="perturbationSlider"

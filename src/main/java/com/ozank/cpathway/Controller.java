@@ -127,7 +127,9 @@ public class Controller implements Initializable {
             {
                 int simulationNumber = simulationNumberSpinner.getValue();
                 updateProgress(simulationNumber, simulationNumber*2);
-                int moleculeNumber = moleculeNumberSpinner.getValue();
+                int moleculeNumber;
+                moleculeNumber = moleculeNumberSpinner.getValue();
+                System.out.println(moleculeNumber);
                 int perturbation = (int) Math.round(perturbationSlider.getValue());
                 ModelBuilder modelBuilder = new ModelBuilder(modelReactions, modelMolecules, moleculeNumber, perturbation);
                 Map<String,Integer> perturbed = modelBuilder.getCaseInitialState();
@@ -431,6 +433,7 @@ public class Controller implements Initializable {
         }
         speciesComboBox.setItems(speciesList);
         speciesComboBox.setValue("Select species");
+        //moleculeNumberSpinner.setEditable(false);
     }
 
     @FXML
@@ -477,7 +480,7 @@ public class Controller implements Initializable {
         Label fluxSpinnerLabel = new Label("Flux cut-off");
         fluxSpinnerLabel.setFont(new Font("Arial italic", 14));
         Spinner fluxCutoffSpinner = new Spinner(0, ((int) moleculeNumberSpinner.getValue())^2, 10);
-        fluxCutoffSpinner.setEditable(true);
+        fluxCutoffSpinner.setEditable(false);
         fluxCutoffSpinner.prefWidthProperty().set(90);
         VBox fluxCutoffSpinnerVBox = new VBox();
         fluxCutoffSpinnerVBox.alignmentProperty().set(Pos.CENTER);

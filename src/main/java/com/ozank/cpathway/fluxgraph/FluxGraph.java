@@ -236,8 +236,3 @@ public class FluxGraph {
         }
 
     }
-
-//        Vertex<GReaction> prague = weights.insertVertex(new GReaction("Prague", ""));
-//        weights.insertEdge(tokyo, newYork, new Weight(10838));
-//        graphView.setVertexPosition(beijing, 100, 100);
-//        graphView.getStylableLabel(tokyo).setStyle("-fx-stroke: red; -fx-fill: red;");
