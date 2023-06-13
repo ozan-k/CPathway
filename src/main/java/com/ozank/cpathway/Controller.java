@@ -99,14 +99,8 @@ public class Controller implements Initializable {
     public void start() {
         initiateSpeciesSelection();
         disableControls();
-        //tester();
     }
 
-    public void tester(){
-        System.out.println("#" + getHostServices());
-        speciesComboBox.setValue("Homo sapiens");
-        onChooseSpecies();
-    }
     @FXML
     protected void onRunExperiment() {
         runExperimentButton.setDisable(true);
@@ -129,7 +123,6 @@ public class Controller implements Initializable {
                 updateProgress(simulationNumber, simulationNumber*2);
                 int moleculeNumber;
                 moleculeNumber = moleculeNumberSpinner.getValue();
-                System.out.println(moleculeNumber);
                 int perturbation = (int) Math.round(perturbationSlider.getValue());
                 ModelBuilder modelBuilder = new ModelBuilder(modelReactions, modelMolecules, moleculeNumber, perturbation);
                 Map<String,Integer> perturbed = modelBuilder.getCaseInitialState();

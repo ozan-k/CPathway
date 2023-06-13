@@ -33,14 +33,18 @@ STYLESHEET FOR JAVAFXGRAPH VISUALIZATION
     -fx-opacity: 0.8;
 }
 
+.edge:hover {
+    -fx-stroke-width: 4;
+}
+
 .edge-label {
     -fx-font: normal 8pt "sans-serif";
 }
 
 .arrow {
     -fx-stroke-width: 2;
-    -fx-stroke: #FF6A66;
-    -fx-opacity: 0.8;
+    /*-fx-stroke: #FF6A66;
+    -fx-opacity: 0.8;*/
 }
 
 /* Custom vertex. You should revert any unwanted styling in the default element,

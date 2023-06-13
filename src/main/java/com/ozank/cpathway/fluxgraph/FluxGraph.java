@@ -4,9 +4,7 @@ import com.brunomnsilva.smartgraph.containers.SmartGraphDemoContainer;
 import com.brunomnsilva.smartgraph.graph.Digraph;
 import com.brunomnsilva.smartgraph.graph.DigraphEdgeList;
 import com.brunomnsilva.smartgraph.graph.Vertex;
-import com.brunomnsilva.smartgraph.graphview.SmartCircularSortedPlacementStrategy;
-import com.brunomnsilva.smartgraph.graphview.SmartGraphPanel;
-import com.brunomnsilva.smartgraph.graphview.SmartGraphProperties;
+import com.brunomnsilva.smartgraph.graphview.*;
 import com.ozank.cpathway.simulation.Matrix;
 import com.ozank.cpathway.simulation.SimulationModel;
 import com.ozank.cpathway.simulation.TripleIndex;
@@ -170,15 +168,23 @@ public class FluxGraph {
                     properties,
                     new SmartCircularSortedPlacementStrategy());
 
-            int k= 1;
             int edgeWeight;
             for (String s : graphEdges.keySet()) {
                 edgeWeight = graphEdges.get(s).getWeight();
-                graphView.getStylableEdge(graphEdges.get(s)).setStyle("-fx-stroke-width: "
-                        + mapFluxesToWidths(edgeWeight) +";" +
-                        ( edgeWeight>0 ? "-fx-stroke: #9BD087;" : "-fx-stroke: #FF6D66;"));
+                String edgeStyle = ( edgeWeight>0 ? "-fx-stroke: #9BD087;" : "-fx-stroke: #FF6D66;");
+                SmartStylableNode stylableEdge = graphView.getStylableEdge(graphEdges.get(s));
+                stylableEdge.setStyle("-fx-stroke-width: " + mapFluxesToWidths(edgeWeight) +";" + edgeStyle);
+                if (stylableEdge instanceof SmartGraphEdgeLine<?,?>){
+                    SmartGraphEdgeLine edge = (SmartGraphEdgeLine) stylableEdge;
+                    SmartArrow stylableArrow = edge.getAttachedArrow();
+                    stylableArrow.setStyleClass(edgeStyle);
+                }
+                if (stylableEdge instanceof SmartGraphEdgeCurve<?,?>){
+                    SmartGraphEdgeCurve edge = (SmartGraphEdgeCurve) stylableEdge;
+                    SmartArrow stylableArrow = edge.getAttachedArrow();
+                    stylableArrow.setStyleClass(edgeStyle);
+                }
                 // #58ABAE;"
-                k++;
             }
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             graphView.setVertexDoubleClickAction(graphVertex -> {
@@ -194,9 +200,9 @@ public class FluxGraph {
 
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             Stage fluxStage = new Stage(StageStyle.DECORATED);
-            fluxStage.setTitle("Flux-Difference Graph");
+            fluxStage.setTitle("Causal Graph");
             fluxStage.setMinHeight(500);
-            fluxStage.setMinWidth(800);
+            fluxStage.setMinWidth(600);
             Scene scene = new Scene(new SmartGraphDemoContainer(graphView), 1024, 768);
             fluxStage.setScene(scene);
             fluxStage.show();
