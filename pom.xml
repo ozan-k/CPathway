@@ -21,8 +21,6 @@
     </properties>
 
     <dependencies>
-
-
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -32,7 +30,13 @@
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>${javafx.version}</version>
-            <classifier>mac-aarch64</classifier>
+<!--            <classifier>mac-aarch64</classifier>-->
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>${javafx.version}</version>
+<!--            <classifier>mac-aarch64</classifier>-->
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
