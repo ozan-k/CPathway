@@ -23,6 +23,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
+import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -164,9 +166,19 @@ public class FluxGraph {
 
             String customProps = "edge.label = true" + "\n" + "edge.arrow = true";
             SmartGraphProperties properties = new SmartGraphProperties(customProps);
-            SmartGraphPanel<GReaction, GEdge> graphView = new SmartGraphPanel<>(edges,
+
+            URI uri;
+            try {
+                URL url = this.getClass().getClassLoader().getResource("smartgraph.css");
+                uri = url.toURI();
+            } catch (Throwable ex){
+                throw new Error("Unexpected exception",ex);
+            }
+            SmartGraphPanel<GReaction, GEdge> graphView = new SmartGraphPanel<>(
+                    edges,
                     properties,
-                    new SmartCircularSortedPlacementStrategy());
+                    new SmartCircularSortedPlacementStrategy(),
+                    uri);
 
             int edgeWeight;
             for (String s : graphEdges.keySet()) {
