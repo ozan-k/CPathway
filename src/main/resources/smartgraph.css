@@ -34,7 +34,7 @@ STYLESHEET FOR JAVAFXGRAPH VISUALIZATION
 }
 
 .edge:hover {
-    -fx-stroke-width: 4;
+   /* -fx-stroke-width: 4; */
 }
 
 .edge-label {

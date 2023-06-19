@@ -189,12 +189,12 @@ public class FluxGraph {
                 if (stylableEdge instanceof SmartGraphEdgeLine<?,?>){
                     SmartGraphEdgeLine edge = (SmartGraphEdgeLine) stylableEdge;
                     SmartArrow stylableArrow = edge.getAttachedArrow();
-                    stylableArrow.setStyleClass(edgeStyle);
+                    stylableArrow.setStyle(edgeStyle);
                 }
                 if (stylableEdge instanceof SmartGraphEdgeCurve<?,?>){
                     SmartGraphEdgeCurve edge = (SmartGraphEdgeCurve) stylableEdge;
                     SmartArrow stylableArrow = edge.getAttachedArrow();
-                    stylableArrow.setStyleClass(edgeStyle);
+                    stylableArrow.setStyle(edgeStyle);
                 }
                 // #58ABAE;"
             }
